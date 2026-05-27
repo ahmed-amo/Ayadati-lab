@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "AYADATI LAB — Laboratoire & clinique",
+    "description": "Analyses sanguines précises, parcours patient fluide, résultats sécurisés. Réservez votre créneau en ligne sans compte."
+  },
+  "nav": {
+    "services": "Services",
+    "process": "Parcours",
+    "about": "À propos",
+    "book": "Prendre rendez-vous",
+    "staffLogin": "Espace personnel"
+  },
+  "hero": {
+    "badge": "Laboratoire médical — Constantine",
+    "title": "Votre santé, analysée avec rigueur",
+    "subtitle": "AYADATI LAB combine expertise biologique et expérience digitale pour des prélèvements rapides, un suivi transparent et des résultats fiables — sans création de compte pour réserver.",
+    "ctaBook": "Réserver un créneau",
+    "ctaServices": "Découvrir nos analyses",
+    "statPatients": "Patients accompagnés",
+    "statTests": "Analyses réalisées",
+    "statSatisfaction": "Satisfaction"
+  },
+  "services": {
+    "title": "Analyses disponibles",
+    "subtitle": "Panels courants réalisés dans notre laboratoire partenaire, avec plages de référence validées par nos biologistes.",
+    "cta": "Réserver cette analyse"
+  },
+  "process": {
+    "title": "Comment ça marche",
+    "step1Title": "Réservez en ligne",
+    "step1Desc": "Indiquez vos coordonnées, la date et l'heure souhaitées. Aucune inscription requise.",
+    "step2Title": "Présentez-vous au labo",
+    "step2Desc": "Munissez-vous de votre référence QR. L'équipe d'accueil vous oriente.",
+    "step3Title": "Recevez vos résultats",
+    "step3Desc": "Après validation médicale, consultez vos résultats via votre espace patient (bientôt)."
+  },
+  "trust": {
+    "title": "Pourquoi AYADATI LAB",
+    "item1": "Équipe qualifiée — infirmiers et auditeurs médicaux dédiés",
+    "item2": "Traçabilité complète — chaque prélèvement est identifié",
+    "item3": "Confidentialité — données hébergées et protégées",
+    "item4": "Sans paiement en ligne — règlement sur place au laboratoire"
+  },
+  "cta": {
+    "title": "Prêt pour votre prochain prélèvement ?",
+    "subtitle": "Choisissez un créneau en moins de deux minutes.",
+    "button": "Commencer la réservation"
+  },
+  "footer": {
+    "rights": "© {year} AYADATI LAB. Tous droits réservés.",
+    "address": "Constantine, Algérie",
+    "email": "contact@ayadatilab.dz",
+    "phone": "+213 555 000 000"
+  },
+  "booking": {
+    "title": "Réservation sans compte",
+    "subtitle": "Remplissez le formulaire — notre équipe confirmera votre créneau par SMS ou appel.",
+    "fullName": "Nom complet",
+    "phone": "Téléphone mobile",
+    "email": "E-mail (optionnel)",
+    "nationalId": "N° pièce d'identité (optionnel)",
+    "date": "Date souhaitée",
+    "time": "Heure souhaitée",
+    "testType": "Type d'analyse",
+    "notes": "Notes (jeûne, ordonnance, etc.)",
+    "submit": "Confirmer la demande",
+    "submitting": "Envoi en cours…",
+    "successTitle": "Demande enregistrée",
+    "successBody": "Conservez votre référence. Présentez-vous à la date indiquée avec une pièce d'identité.",
+    "reference": "Référence",
+    "backHome": "Retour à l'accueil",
+    "selectTest": "Sélectionnez une analyse",
+    "errorGeneric": "Impossible d'enregistrer la demande. Réessayez ou contactez le laboratoire."
+  }
+}

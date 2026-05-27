@@ -1,0 +1,208 @@
+// AYADATI LAB 2026 — PostgreSQL schema (no payment models)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  AUDITOR
+  NURSE
+  RECEPTIONIST
+  PATIENT
+}
+
+enum BloodType {
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  AB_POS
+  AB_NEG
+  O_POS
+  O_NEG
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum TestResultStatus {
+  RECEIVED
+  ANALYZING
+  SIGNED
+}
+
+enum ComplaintCategory {
+  SERVICE
+  RESULT
+  OTHER
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+}
+
+enum GuestBookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  fullName     String    @map("full_name")
+  role         UserRole
+  locale       String    @default("fr")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  patient      Patient?
+  testResults  TestResult[] @relation("NurseResults")
+  signedResults TestResult[] @relation("AuditorSignatures")
+  complaintsAssigned Complaint[] @relation("AssignedComplaints")
+
+  @@map("users")
+}
+
+model Patient {
+  id          Int       @id @default(autoincrement())
+  userId      Int?      @unique @map("user_id")
+  nationalId  String?   @unique @map("national_id")
+  dateOfBirth DateTime? @map("date_of_birth")
+  bloodType   BloodType? @map("blood_type")
+  gender      Gender?
+  phone       String
+  address     String?
+  allergies   String?
+  notes       String?
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user          User?          @relation(fields: [userId], references: [id])
+  appointments  Appointment[]
+  complaints    Complaint[]
+
+  @@index([nationalId])
+  @@map("patients")
+}
+
+model Appointment {
+  id              Int               @id @default(autoincrement())
+  patientId       Int?              @map("patient_id")
+  guestBookingId  Int?              @unique @map("guest_booking_id")
+  appointmentDate DateTime          @map("appointment_date")
+  qrToken         String            @unique @default(cuid()) @map("qr_token")
+  tokenExpiresAt  DateTime?         @map("token_expires_at")
+  status          AppointmentStatus @default(PENDING)
+  testType        String            @map("test_type")
+  isWalkin        Boolean           @default(false) @map("is_walkin")
+  notes           String?
+  deletedAt       DateTime?         @map("deleted_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  patient      Patient?      @relation(fields: [patientId], references: [id])
+  guestBooking GuestBooking? @relation(fields: [guestBookingId], references: [id])
+  testResult   TestResult?
+
+  @@index([appointmentDate, status])
+  @@map("appointments")
+}
+
+/// Public showcase booking — no account required
+model GuestBooking {
+  id              Int                @id @default(autoincrement())
+  fullName        String             @map("full_name")
+  phone           String
+  email           String?
+  nationalId      String?            @map("national_id")
+  appointmentDate DateTime           @map("appointment_date")
+  preferredTime   String             @map("preferred_time")
+  testType        String             @map("test_type")
+  notes           String?
+  status          GuestBookingStatus @default(PENDING)
+  qrToken         String             @unique @default(cuid()) @map("qr_token")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  appointment Appointment?
+
+  @@index([appointmentDate, status])
+  @@map("guest_bookings")
+}
+
+model TestResult {
+  id            Int              @id @default(autoincrement())
+  appointmentId Int              @unique @map("appointment_id")
+  nurseId       Int              @map("nurse_id")
+  auditorId     Int?             @map("auditor_id")
+  bloodType     BloodType        @map("blood_type")
+  rawData       Json             @map("raw_data")
+  status        TestResultStatus @default(RECEIVED)
+  auditorNotes  String?          @map("auditor_notes")
+  signedAt      DateTime?        @map("signed_at")
+  deletedAt     DateTime?        @map("deleted_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  nurse       User        @relation("NurseResults", fields: [nurseId], references: [id])
+  auditor     User?       @relation("AuditorSignatures", fields: [auditorId], references: [id])
+
+  // @todo v2: Python ML microservice for optional analysis
+
+  @@map("test_results")
+}
+
+model Complaint {
+  id           Int               @id @default(autoincrement())
+  patientId    Int               @map("patient_id")
+  subject      String
+  body         String
+  category     ComplaintCategory
+  status       ComplaintStatus   @default(OPEN)
+  assignedToId Int?              @map("assigned_to_id")
+  resolvedAt   DateTime?         @map("resolved_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  patient    Patient @relation(fields: [patientId], references: [id])
+  assignedTo User?   @relation("AssignedComplaints", fields: [assignedToId], references: [id])
+
+  @@map("complaints")
+}
+
+model LabService {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  nameFr      String   @map("name_fr")
+  nameAr      String   @map("name_ar")
+  nameEn      String   @map("name_en")
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("lab_services")
+}

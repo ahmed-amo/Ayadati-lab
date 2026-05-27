@@ -1,1 +1,26 @@
-{}
+{
+  "name": "ayadati-lab",
+  "version": "2026.1.0",
+  "private": true,
+  "description": "AYADATI LAB — clinic & medical lab management (NestJS + Next.js)",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build -w apps/api && npm run build -w apps/web",
+    "db:generate": "npm run prisma:generate -w apps/api",
+    "db:migrate": "npm run prisma:migrate -w apps/api",
+    "db:push": "npm run prisma:push -w apps/api",
+    "db:studio": "npm run prisma:studio -w apps/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

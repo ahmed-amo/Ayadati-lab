@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "AYADATI LAB — Medical laboratory & clinic",
+    "description": "Accurate blood testing, smooth patient journey, secure results. Book your slot online without an account."
+  },
+  "nav": {
+    "services": "Services",
+    "process": "Process",
+    "about": "About",
+    "book": "Book appointment",
+    "staffLogin": "Staff login"
+  },
+  "hero": {
+    "badge": "Medical laboratory — Constantine",
+    "title": "Your health, analyzed with precision",
+    "subtitle": "AYADATI LAB combines lab expertise with a modern digital experience — fast sampling, clear follow-up, and reliable results. No account needed to book.",
+    "ctaBook": "Book a slot",
+    "ctaServices": "Explore tests",
+    "statPatients": "Patients served",
+    "statTests": "Tests performed",
+    "statSatisfaction": "Satisfaction"
+  },
+  "services": {
+    "title": "Available tests",
+    "subtitle": "Common panels performed in our partner laboratory, with reference ranges validated by our medical team.",
+    "cta": "Book this test"
+  },
+  "process": {
+    "title": "How it works",
+    "step1Title": "Book online",
+    "step1Desc": "Enter your details, preferred date and time. No sign-up required.",
+    "step2Title": "Visit the lab",
+    "step2Desc": "Bring your QR reference. Reception will guide you.",
+    "step3Title": "Get your results",
+    "step3Desc": "After medical sign-off, access results through your patient portal (coming soon)."
+  },
+  "trust": {
+    "title": "Why AYADATI LAB",
+    "item1": "Qualified team — dedicated nurses and medical auditors",
+    "item2": "Full traceability — every sample is tracked",
+    "item3": "Privacy — protected, hosted health data",
+    "item4": "No online payment — pay at the laboratory on site"
+  },
+  "cta": {
+    "title": "Ready for your next blood draw?",
+    "subtitle": "Pick a slot in under two minutes.",
+    "button": "Start booking"
+  },
+  "footer": {
+    "rights": "© {year} AYADATI LAB. All rights reserved.",
+    "address": "Constantine, Algeria",
+    "email": "contact@ayadatilab.dz",
+    "phone": "+213 555 000 000"
+  },
+  "booking": {
+    "title": "Book without an account",
+    "subtitle": "Fill in the form — our team will confirm your slot by SMS or phone.",
+    "fullName": "Full name",
+    "phone": "Mobile phone",
+    "email": "Email (optional)",
+    "nationalId": "ID number (optional)",
+    "date": "Preferred date",
+    "time": "Preferred time",
+    "testType": "Test type",
+    "notes": "Notes (fasting, prescription, etc.)",
+    "submit": "Submit request",
+    "submitting": "Sending…",
+    "successTitle": "Request received",
+    "successBody": "Keep your reference. Visit on the selected date with ID.",
+    "reference": "Reference",
+    "backHome": "Back to home",
+    "selectTest": "Select a test",
+    "errorGeneric": "Could not save your request. Please try again or call the lab."
+  }
+}
