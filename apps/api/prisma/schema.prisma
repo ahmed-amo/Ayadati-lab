@@ -1,4 +1,4 @@
-// AYADATI LAB 2026 — PostgreSQL schema (no payment models)
+// AYADATI LAB — Multi-tenant SaaS (shared database, tenant_id isolation)
 
 generator client {
   provider = "prisma-client-js"
@@ -9,7 +9,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+}
+
+enum TenantPlan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
 enum UserRole {
+  SUPER_ADMIN
   ADMIN
   AUDITOR
   NURSE
@@ -64,9 +77,38 @@ enum GuestBookingStatus {
   CANCELLED
 }
 
+/// Laboratory organization (SaaS tenant)
+model Tenant {
+  id                String       @id @default(cuid())
+  slug              String       @unique
+  name              String
+  nameAr            String?      @map("name_ar")
+  city              String?
+  phone             String?
+  email             String?
+  logoUrl           String?      @map("logo_url")
+  status            TenantStatus @default(TRIAL)
+  plan              TenantPlan   @default(STARTER)
+  dailyBookingLimit Int          @default(50) @map("daily_booking_limit")
+  trialEndsAt       DateTime?    @map("trial_ends_at")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  users         User[]
+  patients      Patient[]
+  appointments  Appointment[]
+  guestBookings GuestBooking[]
+  testResults   TestResult[]
+  complaints    Complaint[]
+  labServices   LabService[]
+
+  @@map("tenants")
+}
+
 model User {
   id           Int       @id @default(autoincrement())
-  email        String    @unique
+  tenantId     String?   @map("tenant_id")
+  email        String
   passwordHash String    @map("password_hash")
   fullName     String    @map("full_name")
   role         UserRole
@@ -75,18 +117,22 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  patient      Patient?
-  testResults  TestResult[] @relation("NurseResults")
-  signedResults TestResult[] @relation("AuditorSignatures")
-  complaintsAssigned Complaint[] @relation("AssignedComplaints")
+  tenant             Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient            Patient?
+  testResults        TestResult[] @relation("NurseResults")
+  signedResults      TestResult[] @relation("AuditorSignatures")
+  complaintsAssigned Complaint[]  @relation("AssignedComplaints")
 
+  @@unique([tenantId, email])
+  @@index([tenantId])
   @@map("users")
 }
 
 model Patient {
   id          Int       @id @default(autoincrement())
+  tenantId    String    @map("tenant_id")
   userId      Int?      @unique @map("user_id")
-  nationalId  String?   @unique @map("national_id")
+  nationalId  String?   @map("national_id")
   dateOfBirth DateTime? @map("date_of_birth")
   bloodType   BloodType? @map("blood_type")
   gender      Gender?
@@ -98,16 +144,19 @@ model Patient {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  user          User?          @relation(fields: [userId], references: [id])
-  appointments  Appointment[]
-  complaints    Complaint[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+  complaints   Complaint[]
 
-  @@index([nationalId])
+  @@unique([tenantId, nationalId])
+  @@index([tenantId])
   @@map("patients")
 }
 
 model Appointment {
   id              Int               @id @default(autoincrement())
+  tenantId        String            @map("tenant_id")
   patientId       Int?              @map("patient_id")
   guestBookingId  Int?              @unique @map("guest_booking_id")
   appointmentDate DateTime          @map("appointment_date")
@@ -121,17 +170,18 @@ model Appointment {
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
 
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   patient      Patient?      @relation(fields: [patientId], references: [id])
   guestBooking GuestBooking? @relation(fields: [guestBookingId], references: [id])
   testResult   TestResult?
 
-  @@index([appointmentDate, status])
+  @@index([tenantId, appointmentDate, status])
   @@map("appointments")
 }
 
-/// Public showcase booking — no account required
 model GuestBooking {
   id              Int                @id @default(autoincrement())
+  tenantId        String             @map("tenant_id")
   fullName        String             @map("full_name")
   phone           String
   email           String?
@@ -145,14 +195,16 @@ model GuestBooking {
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
 
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   appointment Appointment?
 
-  @@index([appointmentDate, status])
+  @@index([tenantId, appointmentDate, status])
   @@map("guest_bookings")
 }
 
 model TestResult {
   id            Int              @id @default(autoincrement())
+  tenantId      String           @map("tenant_id")
   appointmentId Int              @unique @map("appointment_id")
   nurseId       Int              @map("nurse_id")
   auditorId     Int?             @map("auditor_id")
@@ -165,17 +217,18 @@ model TestResult {
   createdAt     DateTime         @default(now()) @map("created_at")
   updatedAt     DateTime         @updatedAt @map("updated_at")
 
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   appointment Appointment @relation(fields: [appointmentId], references: [id])
   nurse       User        @relation("NurseResults", fields: [nurseId], references: [id])
   auditor     User?       @relation("AuditorSignatures", fields: [auditorId], references: [id])
 
-  // @todo v2: Python ML microservice for optional analysis
-
+  @@index([tenantId])
   @@map("test_results")
 }
 
 model Complaint {
   id           Int               @id @default(autoincrement())
+  tenantId     String            @map("tenant_id")
   patientId    Int               @map("patient_id")
   subject      String
   body         String
@@ -186,15 +239,18 @@ model Complaint {
   createdAt    DateTime          @default(now()) @map("created_at")
   updatedAt    DateTime          @updatedAt @map("updated_at")
 
+  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   patient    Patient @relation(fields: [patientId], references: [id])
   assignedTo User?   @relation("AssignedComplaints", fields: [assignedToId], references: [id])
 
+  @@index([tenantId])
   @@map("complaints")
 }
 
 model LabService {
   id          Int      @id @default(autoincrement())
-  slug        String   @unique
+  tenantId    String   @map("tenant_id")
+  slug        String
   nameFr      String   @map("name_fr")
   nameAr      String   @map("name_ar")
   nameEn      String   @map("name_en")
@@ -204,5 +260,9 @@ model LabService {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
   @@map("lab_services")
 }

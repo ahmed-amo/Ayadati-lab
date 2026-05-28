@@ -1,0 +1,42 @@
+export const DEFAULT_LAB_SERVICES = [
+  {
+    slug: 'cbc',
+    nameFr: 'Numération formule sanguine (NFS)',
+    nameAr: 'تحليل الدم الشامل',
+    nameEn: 'Complete Blood Count (CBC)',
+    description: 'Hémoglobine, globules rouges, plaquettes, leucocytes',
+    sortOrder: 1,
+  },
+  {
+    slug: 'bmp',
+    nameFr: 'Bilan métabolique de base',
+    nameAr: 'التحليل الأيضي الأساسي',
+    nameEn: 'Basic Metabolic Panel',
+    description: 'Glucose, électrolytes, fonction rénale',
+    sortOrder: 2,
+  },
+  {
+    slug: 'hba1c',
+    nameFr: 'Hémoglobine glyquée (HbA1c)',
+    nameAr: 'الهيموغلوبين السكري',
+    nameEn: 'Hemoglobin A1C',
+    description: 'Suivi glycémique sur 3 mois',
+    sortOrder: 3,
+  },
+  {
+    slug: 'lipid',
+    nameFr: 'Bilan lipidique',
+    nameAr: 'تحليل الدهون',
+    nameEn: 'Lipid Panel',
+    description: 'Cholestérol total, HDL, LDL, triglycérides',
+    sortOrder: 4,
+  },
+  {
+    slug: 'thyroid',
+    nameFr: 'Bilan thyroïdien',
+    nameAr: 'تحليل الغدة الدرقية',
+    nameEn: 'Thyroid Function Tests',
+    description: 'TSH, T3, T4',
+    sortOrder: 5,
+  },
+] as const;

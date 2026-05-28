@@ -11,6 +11,7 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react';
+import { tenantBasePath } from './tenant-paths';
 
 export type AppRole =
   | 'admin'
@@ -30,8 +31,12 @@ export interface NavSection {
   items: NavItem[];
 }
 
-export function navForRole(locale: string, role: AppRole): NavSection[] {
-  const p = `/${locale}`;
+export function navForRole(
+  locale: string,
+  tenantSlug: string,
+  role: AppRole,
+): NavSection[] {
+  const p = tenantBasePath(locale, tenantSlug);
   const config: Record<AppRole, NavSection[]> = {
     admin: [
       {
@@ -47,7 +52,11 @@ export function navForRole(locale: string, role: AppRole): NavSection[] {
         title: 'Overview',
         items: [
           { label: 'Dashboard', href: `${p}/auditor`, icon: LayoutDashboard },
-          { label: 'Pending results', href: `${p}/auditor/results`, icon: ClipboardCheck },
+          {
+            label: 'Pending results',
+            href: `${p}/auditor/results`,
+            icon: ClipboardCheck,
+          },
         ],
       },
     ],
@@ -65,15 +74,31 @@ export function navForRole(locale: string, role: AppRole): NavSection[] {
       {
         title: 'Overview',
         items: [
-          { label: 'Dashboard', href: `${p}/receptionist`, icon: LayoutDashboard },
-          { label: 'Bookings', href: `${p}/receptionist/bookings`, icon: CalendarDays },
-          { label: 'Appointments', href: `${p}/receptionist/appointments`, icon: CalendarDays },
+          {
+            label: 'Dashboard',
+            href: `${p}/receptionist`,
+            icon: LayoutDashboard,
+          },
+          {
+            label: 'Bookings',
+            href: `${p}/receptionist/bookings`,
+            icon: CalendarDays,
+          },
+          {
+            label: 'Appointments',
+            href: `${p}/receptionist/appointments`,
+            icon: CalendarDays,
+          },
         ],
       },
       {
         title: 'Patients',
         items: [
-          { label: 'Register', href: `${p}/receptionist/patients/new`, icon: UserPlus },
+          {
+            label: 'Register',
+            href: `${p}/receptionist/patients/new`,
+            icon: UserPlus,
+          },
         ],
       },
     ],
@@ -83,7 +108,11 @@ export function navForRole(locale: string, role: AppRole): NavSection[] {
         items: [
           { label: 'Home', href: `${p}/patient`, icon: Home },
           { label: 'My results', href: `${p}/patient/results`, icon: FlaskConical },
-          { label: 'Complaints', href: `${p}/patient/complaints`, icon: MessageSquarePlus },
+          {
+            label: 'Complaints',
+            href: `${p}/patient/complaints`,
+            icon: MessageSquarePlus,
+          },
         ],
       },
     ],
@@ -91,8 +120,12 @@ export function navForRole(locale: string, role: AppRole): NavSection[] {
   return config[role];
 }
 
-export function homeForRole(locale: string, role: AppRole): string {
-  const p = `/${locale}`;
+export function homeForRole(
+  locale: string,
+  tenantSlug: string,
+  role: AppRole,
+): string {
+  const p = tenantBasePath(locale, tenantSlug);
   const map: Record<AppRole, string> = {
     admin: `${p}/admin`,
     auditor: `${p}/auditor`,

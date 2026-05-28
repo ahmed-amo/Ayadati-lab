@@ -5,17 +5,22 @@ import Link from 'next/link';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { Button } from '@/components/ui/button';
 
-export function PublicHeader() {
+interface PublicHeaderProps {
+  tenantSlug?: string;
+}
+
+export function PublicHeader({ tenantSlug }: PublicHeaderProps) {
   const t = useTranslations('nav');
   const locale = useLocale();
+  const homeHref = tenantSlug ? `/${locale}/l/${tenantSlug}` : `/${locale}`;
+  const bookingHref = tenantSlug
+    ? `/${locale}/l/${tenantSlug}/booking`
+    : `/${locale}/l/demo-lab/booking`;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-brand-navy/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-        <Link
-          href={`/${locale}`}
-          className="flex items-center gap-2 text-white"
-        >
+        <Link href={homeHref} className="flex items-center gap-2 text-white">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-teal text-sm font-bold text-brand-navy">
             A
           </span>
@@ -31,9 +36,11 @@ export function PublicHeader() {
           <a href="#process" className="hover:text-brand-teal">
             {t('process')}
           </a>
-          <a href="#about" className="hover:text-brand-teal">
-            {t('about')}
-          </a>
+          {!tenantSlug && (
+            <Link href={`/${locale}/register`} className="hover:text-brand-teal">
+              For labs
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -44,7 +51,7 @@ export function PublicHeader() {
             size="sm"
             className="hidden bg-teal-500 text-white hover:bg-teal-600 sm:inline-flex"
           >
-            <Link href={`/${locale}/booking`}>{t('book')}</Link>
+            <Link href={bookingHref}>{t('book')}</Link>
           </Button>
         </div>
       </div>

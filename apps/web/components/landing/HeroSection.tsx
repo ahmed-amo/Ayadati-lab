@@ -5,9 +5,14 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Activity, Clock, ShieldCheck } from 'lucide-react';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  tenantSlug?: string;
+}
+
+export function HeroSection({ tenantSlug = 'demo-lab' }: HeroSectionProps) {
   const t = useTranslations('hero');
   const locale = useLocale();
+  const bookingHref = `/${locale}/l/${tenantSlug}/booking`;
 
   return (
     <section className="relative overflow-hidden bg-hero-gradient text-white">
@@ -30,7 +35,7 @@ export function HeroSection() {
               size="lg"
               className="bg-teal-500 text-white hover:bg-teal-600"
             >
-              <Link href={`/${locale}/booking`}>{t('ctaBook')}</Link>
+              <Link href={bookingHref}>{t('ctaBook')}</Link>
             </Button>
             <Button asChild variant="secondary" size="lg">
               <a href="#services">{t('ctaServices')}</a>

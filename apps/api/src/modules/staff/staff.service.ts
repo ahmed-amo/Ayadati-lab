@@ -1,19 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GuestBookingStatus, AppointmentStatus } from '@prisma/client';
+import { TenantContext } from '../../common/tenant/tenant-context.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class StaffService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContext,
+  ) {}
 
   async getStats() {
+    const tenantId = this.tenantContext.getTenantId();
     const [bookingsPending, appointmentsToday, appointmentsTotal, patients] =
       await Promise.all([
         this.prisma.guestBooking.count({
-          where: { status: GuestBookingStatus.PENDING },
+          where: { tenantId, status: GuestBookingStatus.PENDING },
         }),
         this.prisma.appointment.count({
           where: {
+            tenantId,
             appointmentDate: {
               gte: new Date(new Date().setHours(0, 0, 0, 0)),
               lt: new Date(new Date().setHours(23, 59, 59, 999)),
@@ -21,8 +27,8 @@ export class StaffService {
             status: { not: AppointmentStatus.CANCELLED },
           },
         }),
-        this.prisma.appointment.count(),
-        this.prisma.patient.count(),
+        this.prisma.appointment.count({ where: { tenantId } }),
+        this.prisma.patient.count({ where: { tenantId } }),
       ]);
 
     return {
@@ -34,15 +40,18 @@ export class StaffService {
   }
 
   listGuestBookings() {
+    const tenantId = this.tenantContext.getTenantId();
     return this.prisma.guestBooking.findMany({
+      where: { tenantId },
       orderBy: { appointmentDate: 'asc' },
       include: { appointment: true },
     });
   }
 
   async confirmGuestBooking(id: number) {
-    const booking = await this.prisma.guestBooking.findUnique({
-      where: { id },
+    const tenantId = this.tenantContext.getTenantId();
+    const booking = await this.prisma.guestBooking.findFirst({
+      where: { id, tenantId },
       include: { appointment: true },
     });
     if (!booking) {
@@ -62,7 +71,9 @@ export class StaffService {
   }
 
   listAppointments() {
+    const tenantId = this.tenantContext.getTenantId();
     return this.prisma.appointment.findMany({
+      where: { tenantId },
       orderBy: { appointmentDate: 'desc' },
       include: {
         guestBooking: true,

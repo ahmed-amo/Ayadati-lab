@@ -1,7 +1,10 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import ResultsPortal from '@/components/patient/results-portal';
-
-export default function PatientResultsPage() {
-  return <ResultsPortal />;
+export default async function LegacyPatientResultsRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/l/demo-lab/patient/results`);
 }

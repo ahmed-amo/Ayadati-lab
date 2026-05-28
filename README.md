@@ -1,20 +1,33 @@
-# AYADATI LAB 2026
+# AYADATI LAB — Multi-tenant SaaS
 
-Clinic & medical laboratory management platform for Algeria.
+Platform for **multiple independent medical laboratories**. Each lab is a **tenant** with isolated data, branded public portal, and staff workspace.
 
-**Brand:** AYADATI LAB  
-**Stack:** NestJS 11 · Next.js 15 · PostgreSQL 16 · Prisma 6  
-**Payments:** None in this version — patients pay at the laboratory on site.
+**Stack:** NestJS 11 · Next.js 15 · PostgreSQL 16 · Prisma 6
 
 ---
 
-## Repository layout
+## Architecture
 
-| Path | Description |
-|------|-------------|
-| `apps/web` | Next.js showcase site — landing page + **guest booking** (no sign-in) |
-| `apps/api` | NestJS REST API — public booking endpoints |
-| `../AI_INT` | Archived ML training assets (not used by the app) |
+| Layer | Multi-tenancy |
+|--------|----------------|
+| Database | Shared PostgreSQL, `tenant_id` on all tenant-owned rows |
+| API | Routes under `/api/v1/t/:tenantSlug/...` + global `/api/v1/tenants` |
+| Web | Platform at `/[locale]` · Each lab at `/[locale]/l/[tenantSlug]` |
+
+### Tenant model
+
+- **Slug** — URL identifier (`demo-lab` → `/fr/l/demo-lab`)
+- **Plans** — `STARTER` · `PRO` · `ENTERPRISE`
+- **Status** — `TRIAL` · `ACTIVE` · `SUSPENDED`
+- **Per-tenant limits** — e.g. `dailyBookingLimit` (default 50)
+
+### Roles
+
+| Role | Scope |
+|------|--------|
+| `SUPER_ADMIN` | Platform (no `tenant_id`) |
+| `ADMIN` | Lab owner |
+| `RECEPTIONIST` · `NURSE` · `AUDITOR` · `PATIENT` | Within one tenant |
 
 ---
 
@@ -23,94 +36,85 @@ Clinic & medical laboratory management platform for Algeria.
 ### Prerequisites
 
 - Node.js 22+
-- PostgreSQL 16
+- PostgreSQL 16 (or `docker compose up -d db`)
 
-### 1. Install dependencies
+### 1. Install
 
 ```bash
 npm install
-```
-
-### 2. Configure API
-
-```bash
 cp apps/api/.env.example apps/api/.env
-# Edit DATABASE_URL, then:
-npm run db:push -w apps/api
-npm run db:generate -w apps/api
-npm run prisma:seed -w apps/api
-```
-
-### 3. Configure web
-
-```bash
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-### 4. Run dev servers
+### 2. Database
+
+```bash
+docker compose up -d db   # optional
+npm run db:push
+npm run prisma:seed -w apps/api
+```
+
+### 3. Run
 
 ```bash
 npm run dev
 ```
 
-- **Showcase site:** http://localhost:3000/fr  
-- **Guest booking:** http://localhost:3000/fr/booking  
-- **API:** http://localhost:4000/api/v1  
-- **Swagger:** http://localhost:4000/docs  
+| URL | Purpose |
+|-----|---------|
+| http://localhost:3000/fr | SaaS platform home |
+| http://localhost:3000/fr/register | Register a new lab |
+| http://localhost:3000/fr/l/demo-lab | Demo lab portal |
+| http://localhost:3000/fr/l/demo-lab/booking | Guest booking |
+| http://localhost:4000/docs | API Swagger |
+
+**Demo tenant** `demo-lab` — password `ayadati2026` for all seeded staff emails.
 
 ---
 
-## Public API (no auth)
+## API
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` | `/api/v1/public/lab-services` | List bookable tests |
-| `POST` | `/api/v1/public/bookings` | Create guest appointment |
-| `GET` | `/api/v1/public/bookings/:qrToken` | Lookup by reference |
+### Platform (no tenant)
 
-### Booking body example
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/v1/tenants/register` | Onboard new laboratory |
+| `GET` | `/api/v1/tenants` | List active labs |
+| `GET` | `/api/v1/tenants/:slug` | Public lab profile |
 
-```json
-{
-  "fullName": "Ahmed Benali",
-  "phone": "0555123456",
-  "appointmentDate": "2026-06-15",
-  "preferredTime": "09:30",
-  "testType": "cbc"
-}
+### Per-tenant (`:tenantSlug` = e.g. `demo-lab`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/t/:tenantSlug/public/lab-services` | Bookable tests |
+| `POST` | `/api/v1/t/:tenantSlug/public/bookings` | Guest booking |
+| `GET` | `/api/v1/t/:tenantSlug/public/bookings/:qrToken` | Booking lookup |
+| `POST` | `/api/v1/t/:tenantSlug/auth/login` | Staff login |
+| `GET` | `/api/v1/t/:tenantSlug/staff/stats` | Dashboard stats |
+
+---
+
+## Register a new lab (example)
+
+```bash
+curl -X POST http://localhost:4000/api/v1/tenants/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "labName": "Clinique El Amal",
+    "slug": "el-amal",
+    "adminEmail": "admin@elamal.dz",
+    "adminFullName": "Dr. Ahmed",
+    "adminPassword": "SecurePass123"
+  }'
 ```
+
+Portal: `http://localhost:3000/fr/l/el-amal`
 
 ---
 
 ## i18n
 
-Locales: **fr** (default) · **ar** (RTL) · **en**
-
-Messages: `apps/web/messages/{fr,ar,en}.json`
-
----
-
-## Roles (dashboard — coming next)
-
-| Role | Capability |
-|------|------------|
-| admin | Full system |
-| auditor | Sign results, reports |
-| nurse | CBC entry + blood type |
-| receptionist | Bookings, complaints |
-| patient | Own portal (authenticated) |
-
-Staff dashboards are not in this showcase release.
-
----
-
-## Design tokens
-
-Defined in `apps/web/tailwind.config.ts`:
-
-- `brand-blue` `#4F74A3`
-- `brand-navy` `#0E2F57`
-- `brand-teal` `#6FB7B3`
+Locales: **fr** · **ar** (RTL) · **en**
 
 ---
 

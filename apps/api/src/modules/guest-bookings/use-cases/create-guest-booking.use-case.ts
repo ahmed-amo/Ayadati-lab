@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GuestBooking } from '@prisma/client';
+import { TenantContext } from '../../../common/tenant/tenant-context.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateGuestBookingDto } from '../dto/create-guest-booking.dto';
 
@@ -15,13 +16,20 @@ export interface GuestBookingCreatedResult {
   preferredTime: string;
   testType: string;
   status: string;
+  tenantSlug: string;
 }
 
 @Injectable()
 export class CreateGuestBookingUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContext,
+  ) {}
 
   async execute(dto: CreateGuestBookingDto): Promise<GuestBookingCreatedResult> {
+    const tenant = this.tenantContext.getTenant();
+    const tenantId = tenant.id;
+
     const appointmentDate = new Date(dto.appointmentDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -31,7 +39,7 @@ export class CreateGuestBookingUseCase {
     }
 
     const service = await this.prisma.labService.findFirst({
-      where: { slug: dto.testType, isActive: true },
+      where: { tenantId, slug: dto.testType, isActive: true },
     });
 
     if (!service) {
@@ -45,12 +53,13 @@ export class CreateGuestBookingUseCase {
 
     const dailyCount = await this.prisma.guestBooking.count({
       where: {
+        tenantId,
         appointmentDate: { gte: dayStart, lte: dayEnd },
         status: { not: 'CANCELLED' },
       },
     });
 
-    if (dailyCount >= 50) {
+    if (dailyCount >= tenant.dailyBookingLimit) {
       throw new BadRequestException(
         'No more appointments available on this date',
       );
@@ -59,6 +68,7 @@ export class CreateGuestBookingUseCase {
     const booking = await this.prisma.$transaction(async (tx) => {
       const guest = await tx.guestBooking.create({
         data: {
+          tenantId,
           fullName: dto.fullName.trim(),
           phone: dto.phone,
           email: dto.email?.trim() || null,
@@ -72,6 +82,7 @@ export class CreateGuestBookingUseCase {
 
       await tx.appointment.create({
         data: {
+          tenantId,
           guestBookingId: guest.id,
           appointmentDate,
           testType: service.slug,
@@ -86,10 +97,13 @@ export class CreateGuestBookingUseCase {
       return guest;
     });
 
-    return this.toResult(booking);
+    return this.toResult(booking, tenant.slug);
   }
 
-  private toResult(booking: GuestBooking): GuestBookingCreatedResult {
+  private toResult(
+    booking: GuestBooking,
+    tenantSlug: string,
+  ): GuestBookingCreatedResult {
     return {
       id: booking.id,
       qrToken: booking.qrToken,
@@ -98,9 +112,7 @@ export class CreateGuestBookingUseCase {
       preferredTime: booking.preferredTime,
       testType: booking.testType,
       status: booking.status,
+      tenantSlug,
     };
   }
 }
-
-// @vitest-environment node
-// describe('CreateGuestBookingUseCase', () => { it.todo('rejects past dates'); });

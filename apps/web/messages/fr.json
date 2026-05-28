@@ -71,5 +71,32 @@
     "backHome": "Retour à l'accueil",
     "selectTest": "Sélectionnez une analyse",
     "errorGeneric": "Impossible d'enregistrer la demande. Réessayez ou contactez le laboratoire."
+  },
+  "platform": {
+    "badge": "SaaS pour laboratoires médicaux",
+    "title": "Gérez votre laboratoire sur une plateforme moderne",
+    "subtitle": "Réservations, équipe et résultats — chaque laboratoire dispose de son portail dédié.",
+    "ctaRegister": "Essai gratuit",
+    "ctaDemo": "Voir la démo",
+    "feat1Title": "Votre portail",
+    "feat1Desc": "Site brandé sur /l/votre-lab",
+    "feat2Title": "Données isolées",
+    "feat2Desc": "Chaque labo reste séparé",
+    "feat3Title": "Rôles staff",
+    "feat3Desc": "Admin, accueil, infirmier, auditeur"
+  },
+  "register": {
+    "title": "Inscrire votre laboratoire",
+    "subtitle": "Essai 14 jours. Tests par défaut et compte admin créés.",
+    "labName": "Nom du laboratoire",
+    "slug": "Identifiant URL",
+    "slugHint": "Lien : ayadati.com/l/votre-slug",
+    "adminName": "Nom de l'administrateur",
+    "adminEmail": "Email admin",
+    "adminPassword": "Mot de passe (8 caractères min.)",
+    "city": "Ville",
+    "submit": "Créer mon laboratoire",
+    "submitting": "Création…",
+    "error": "Échec de l'inscription"
   }
 }

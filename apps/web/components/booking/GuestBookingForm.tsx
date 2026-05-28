@@ -16,6 +16,7 @@ import {
   type LabServiceDto,
   ApiError,
 } from '@/lib/api';
+import { useTenant } from '@/lib/tenant-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +36,7 @@ interface GuestBookingFormProps {
 export function GuestBookingForm({ defaultTestSlug }: GuestBookingFormProps) {
   const t = useTranslations('booking');
   const locale = useLocale();
+  const { tenantSlug } = useTenant();
   const [services, setServices] = useState<LabServiceDto[]>([]);
   const [result, setResult] = useState<GuestBookingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,15 +57,15 @@ export function GuestBookingForm({ defaultTestSlug }: GuestBookingFormProps) {
   });
 
   useEffect(() => {
-    void fetchLabServices()
+    void fetchLabServices(tenantSlug)
       .then(setServices)
       .catch(() => setServices([]));
-  }, []);
+  }, [tenantSlug]);
 
   const onSubmit = async (values: GuestBookingFormValues) => {
     setError(null);
     try {
-      const booking = await createGuestBooking({
+      const booking = await createGuestBooking(tenantSlug, {
         fullName: values.fullName,
         phone: values.phone,
         email: values.email || undefined,

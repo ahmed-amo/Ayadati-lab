@@ -4,17 +4,20 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { TenantInterceptor } from '../../common/tenant/tenant.interceptor';
 import { StaffService } from './staff.service';
 
 @ApiTags('staff')
-@Controller('staff')
+@Controller('t/:tenantSlug/staff')
+@UseInterceptors(TenantInterceptor)
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
   @Get('stats')
-  @ApiOperation({ summary: 'Dashboard statistics' })
+  @ApiOperation({ summary: 'Dashboard statistics for this laboratory' })
   getStats() {
     return this.staffService.getStats();
   }

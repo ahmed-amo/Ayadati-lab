@@ -71,5 +71,32 @@
     "backHome": "Back to home",
     "selectTest": "Select a test",
     "errorGeneric": "Could not save your request. Please try again or call the lab."
+  },
+  "platform": {
+    "badge": "SaaS for medical laboratories",
+    "title": "Run your lab on one modern platform",
+    "subtitle": "Multi-tenant software for bookings, staff workflows, and patient results — each laboratory gets its own branded portal.",
+    "ctaRegister": "Start free trial",
+    "ctaDemo": "View demo lab",
+    "feat1Title": "Your own portal",
+    "feat1Desc": "Branded site at /l/your-lab with online booking",
+    "feat2Title": "Isolated data",
+    "feat2Desc": "Every lab's patients and results stay separate",
+    "feat3Title": "Staff roles",
+    "feat3Desc": "Admin, reception, nurse, auditor, patient"
+  },
+  "register": {
+    "title": "Register your laboratory",
+    "subtitle": "14-day trial. Default tests and admin account created instantly.",
+    "labName": "Laboratory name",
+    "slug": "URL slug",
+    "slugHint": "Used in your link: ayadati.com/l/your-slug",
+    "adminName": "Admin full name",
+    "adminEmail": "Admin email",
+    "adminPassword": "Password (min 8 characters)",
+    "city": "City",
+    "submit": "Create my lab",
+    "submitting": "Creating…",
+    "error": "Registration failed"
   }
 }

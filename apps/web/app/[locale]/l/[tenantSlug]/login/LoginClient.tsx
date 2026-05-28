@@ -1,58 +1,63 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useLocale, useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useAuth } from '@/lib/auth-context'
-import { homeForRole, type AppRole } from '@/lib/nav-config'
-import { ApiError } from '@/lib/api'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useAuth } from '@/lib/auth-context';
+import { homeForRole, type AppRole } from '@/lib/nav-config';
+import { useTenant } from '@/lib/tenant-context';
+import { ApiError } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 
 function mapRole(apiRole: string): AppRole {
-  const r = apiRole.toLowerCase()
-  if (r === 'admin') return 'admin'
-  if (r === 'auditor') return 'auditor'
-  if (r === 'nurse') return 'nurse'
-  if (r === 'receptionist') return 'receptionist'
-  return 'patient'
+  const r = apiRole.toLowerCase();
+  if (r === 'admin') return 'admin';
+  if (r === 'auditor') return 'auditor';
+  if (r === 'nurse') return 'nurse';
+  if (r === 'receptionist') return 'receptionist';
+  return 'patient';
 }
 
 export default function LoginClient() {
-  const t = useTranslations('auth')
-  const locale = useLocale()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { login } = useAuth()
-  const [email, setEmail] = useState('receptionist@ayadatilab.dz')
-  const [password, setPassword] = useState('ayadati2026')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const t = useTranslations('auth');
+  const locale = useLocale();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login } = useAuth();
+  const { tenantSlug, tenant } = useTenant();
+  const [email, setEmail] = useState('receptionist@ayadatilab.dz');
+  const [password, setPassword] = useState('ayadati2026');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
     try {
-      await login(email, password)
-      const next = searchParams.get('next')
+      await login(tenantSlug, email, password);
+      const next = searchParams.get('next');
       if (next) {
-        router.push(next)
+        router.push(next);
       } else {
         const user = JSON.parse(localStorage.getItem('ayadati_auth') ?? '{}') as {
-          role: string
-        }
-        router.push(homeForRole(locale, mapRole(user.role)))
+          role: string;
+          tenantSlug: string;
+        };
+        router.push(
+          homeForRole(locale, user.tenantSlug ?? tenantSlug, mapRole(user.role)),
+        );
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('error'))
+      setError(err instanceof ApiError ? err.message : t('error'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-hero-gradient">
@@ -65,7 +70,9 @@ export default function LoginClient() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-teal text-lg font-bold text-brand-navy">
               A
             </div>
-            <h1 className="text-2xl font-bold text-brand-navy">AYADATI LAB</h1>
+            <h1 className="text-2xl font-bold text-brand-navy">
+              {tenant?.name ?? 'AYADATI LAB'}
+            </h1>
             <p className="mt-2 text-sm text-brand-blue-light">{t('subtitle')}</p>
           </div>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -99,13 +106,15 @@ export default function LoginClient() {
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-gray-text">
-            <Link href={`/${locale}`} className="text-brand-blue hover:underline">
+            <Link
+              href={`/${locale}/l/${tenantSlug}`}
+              className="text-brand-blue hover:underline"
+            >
               {t('backHome')}
             </Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

@@ -1,7 +1,10 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import ComplaintsManagement from '@/components/patient/complaints-management';
-
-export default function PatientComplaintsPage() {
-  return <ComplaintsManagement />;
+export default async function LegacyPatientComplaintsRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/l/demo-lab/patient/complaints`);
 }

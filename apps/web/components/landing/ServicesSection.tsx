@@ -10,11 +10,17 @@ function serviceName(service: LabServiceDto, locale: string): string {
   return service.nameFr;
 }
 
-export async function ServicesSection({ locale }: { locale: string }) {
+export async function ServicesSection({
+  locale,
+  tenantSlug = 'demo-lab',
+}: {
+  locale: string;
+  tenantSlug?: string;
+}) {
   const t = await getTranslations('services');
   let services: LabServiceDto[] = [];
   try {
-    services = await fetchLabServices();
+    services = await fetchLabServices(tenantSlug);
   } catch {
     services = [];
   }
@@ -59,7 +65,7 @@ export async function ServicesSection({ locale }: { locale: string }) {
               )}
               <Button asChild className="mt-6 w-full" variant="default">
                 <Link
-                  href={`/${locale}/booking?test=${service.slug}`}
+                  href={`/${locale}/l/${tenantSlug}/booking?test=${service.slug}`}
                 >
                   {t('cta')}
                 </Link>

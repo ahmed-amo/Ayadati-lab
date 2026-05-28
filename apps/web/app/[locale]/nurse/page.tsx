@@ -1,7 +1,10 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import NurseDashboard from '@/components/dashboards/nurse-dashboard';
-
-export default function NursePage() {
-  return <NurseDashboard />;
+export default async function LegacyNurseRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/l/demo-lab/nurse`);
 }

@@ -11,6 +11,45 @@ export interface AuthUser {
   email: string;
   fullName: string;
   role: string;
+  tenantId: string;
+  tenantSlug: string;
+  tenantName: string;
+}
+
+export interface TenantPublicProfile {
+  slug: string;
+  name: string;
+  nameAr: string | null;
+  city: string | null;
+  phone: string | null;
+  logoUrl: string | null;
+  plan: string;
+  status: string;
+}
+
+export interface TenantListItem {
+  slug: string;
+  name: string;
+  nameAr: string | null;
+  city: string | null;
+  plan: string;
+  status: string;
+}
+
+export interface RegisterTenantPayload {
+  labName: string;
+  slug: string;
+  adminEmail: string;
+  adminFullName: string;
+  adminPassword: string;
+  city?: string;
+  phone?: string;
+}
+
+export interface RegisterTenantResult {
+  tenant: TenantPublicProfile;
+  admin: { email: string; fullName: string; role: string };
+  portalUrl: string;
 }
 
 export interface LabServiceDto {
@@ -29,6 +68,7 @@ export interface GuestBookingResult {
   preferredTime: string;
   testType: string;
   status: string;
+  tenantSlug?: string;
 }
 
 export interface GuestBookingRow {
@@ -90,6 +130,11 @@ export class ApiError extends Error {
   }
 }
 
+function tenantApiPath(tenantSlug: string, path: string): string {
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}/t/${tenantSlug}${normalized}`;
+}
+
 function extractMessage(body: unknown): string {
   if (typeof body === 'object' && body !== null) {
     const msg = (body as { message?: unknown }).message;
@@ -107,14 +152,14 @@ async function parseJson<T>(response: Response): Promise<T> {
   return body as T;
 }
 
-async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
+async function apiGet<T>(url: string): Promise<T> {
+  const res = await fetch(url, { cache: 'no-store' });
   const json = await parseJson<ApiEnvelope<T>>(res);
   return json.data;
 }
 
-async function apiPost<T>(path: string, payload?: unknown): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+async function apiPost<T>(url: string, payload?: unknown): Promise<T> {
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: payload ? JSON.stringify(payload) : undefined,
@@ -123,45 +168,85 @@ async function apiPost<T>(path: string, payload?: unknown): Promise<T> {
   return json.data;
 }
 
-async function apiPatch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { method: 'PATCH' });
+async function apiPatch<T>(url: string): Promise<T> {
+  const res = await fetch(url, { method: 'PATCH' });
   const json = await parseJson<ApiEnvelope<T>>(res);
   return json.data;
 }
 
-export async function fetchLabServices(): Promise<LabServiceDto[]> {
-  const res = await fetch(`${API_BASE}/public/lab-services`, {
-    next: { revalidate: 300 },
-  });
+export async function fetchTenants(): Promise<TenantListItem[]> {
+  return apiGet<TenantListItem[]>(`${API_BASE}/tenants`);
+}
+
+export async function fetchTenantProfile(
+  slug: string,
+): Promise<TenantPublicProfile> {
+  return apiGet<TenantPublicProfile>(`${API_BASE}/tenants/${slug}`);
+}
+
+export async function registerTenant(
+  payload: RegisterTenantPayload,
+): Promise<RegisterTenantResult> {
+  return apiPost<RegisterTenantResult>(`${API_BASE}/tenants/register`, payload);
+}
+
+export async function fetchLabServices(
+  tenantSlug: string,
+): Promise<LabServiceDto[]> {
+  const res = await fetch(
+    tenantApiPath(tenantSlug, '/public/lab-services'),
+    { next: { revalidate: 300 } },
+  );
   const json = await parseJson<ApiEnvelope<LabServiceDto[]>>(res);
   return json.data;
 }
 
 export async function createGuestBooking(
+  tenantSlug: string,
   payload: CreateGuestBookingPayload,
 ): Promise<GuestBookingResult> {
-  return apiPost<GuestBookingResult>('/public/bookings', payload);
+  return apiPost<GuestBookingResult>(
+    tenantApiPath(tenantSlug, '/public/bookings'),
+    payload,
+  );
 }
 
 export async function apiLogin(
+  tenantSlug: string,
   email: string,
   password: string,
 ): Promise<AuthUser> {
-  return apiPost<AuthUser>('/auth/login', { email, password });
+  return apiPost<AuthUser>(tenantApiPath(tenantSlug, '/auth/login'), {
+    email,
+    password,
+  });
 }
 
-export async function fetchDashboardStats(): Promise<DashboardStats> {
-  return apiGet<DashboardStats>('/staff/stats');
+export async function fetchDashboardStats(
+  tenantSlug: string,
+): Promise<DashboardStats> {
+  return apiGet<DashboardStats>(tenantApiPath(tenantSlug, '/staff/stats'));
 }
 
-export async function fetchGuestBookings(): Promise<GuestBookingRow[]> {
-  return apiGet<GuestBookingRow[]>('/staff/bookings');
+export async function fetchGuestBookings(
+  tenantSlug: string,
+): Promise<GuestBookingRow[]> {
+  return apiGet<GuestBookingRow[]>(
+    tenantApiPath(tenantSlug, '/staff/bookings'),
+  );
 }
 
-export async function confirmGuestBooking(id: number): Promise<void> {
-  await apiPatch(`/staff/bookings/${id}/confirm`);
+export async function confirmGuestBooking(
+  tenantSlug: string,
+  id: number,
+): Promise<void> {
+  await apiPatch(tenantApiPath(tenantSlug, `/staff/bookings/${id}/confirm`));
 }
 
-export async function fetchAppointments(): Promise<AppointmentRow[]> {
-  return apiGet<AppointmentRow[]>('/staff/appointments');
+export async function fetchAppointments(
+  tenantSlug: string,
+): Promise<AppointmentRow[]> {
+  return apiGet<AppointmentRow[]>(
+    tenantApiPath(tenantSlug, '/staff/appointments'),
+  );
 }

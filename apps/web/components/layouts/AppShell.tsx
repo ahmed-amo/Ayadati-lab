@@ -7,6 +7,7 @@ import { Menu, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { navForRole, type AppRole } from '@/lib/nav-config';
+import { useTenant } from '@/lib/tenant-context';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,7 +32,8 @@ export function AppShell({ children, role, title }: AppShellProps) {
   const { user, logout } = useAuth();
   const t = useTranslations('nav');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const sections = navForRole(locale, role);
+  const { tenantSlug, tenant } = useTenant();
+  const sections = navForRole(locale, tenantSlug, role);
   const isRtl = locale === 'ar';
 
   return (
@@ -48,7 +50,9 @@ export function AppShell({ children, role, title }: AppShellProps) {
             A
           </div>
           <div>
-            <p className="text-sm font-bold leading-tight">AYADATI LAB</p>
+            <p className="text-sm font-bold leading-tight">
+              {tenant?.name ?? 'AYADATI LAB'}
+            </p>
             <p className="text-xs text-brand-teal">{ROLE_LABEL[role]}</p>
           </div>
         </div>

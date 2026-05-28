@@ -1,16 +1,10 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import StaffList from '@/components/staff/staff-list';
-
-export default function AdminStaffPage() {
-  return (
-    <StaffList
-      onAdd={() => {
-        // TODO: wire to real add-staff flow
-      }}
-      onEdit={() => {
-        // TODO: wire to real edit-staff flow
-      }}
-    />
-  );
+export default async function LegacyAdminStaffRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/l/demo-lab/admin/staff`);
 }

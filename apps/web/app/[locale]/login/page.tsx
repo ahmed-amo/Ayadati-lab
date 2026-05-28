@@ -1,10 +1,10 @@
-import { Suspense } from 'react'
-import LoginClient from './LoginClient'
+import { redirect } from 'next/navigation';
 
-export default function LoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginClient />
-    </Suspense>
-  )
+export default async function LegacyLoginRedirect({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/l/demo-lab/login`);
 }

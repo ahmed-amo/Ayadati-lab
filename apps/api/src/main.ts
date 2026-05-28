@@ -29,7 +29,7 @@ async function bootstrap(): Promise<void> {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('AYADATI LAB API')
-    .setDescription('Clinic & medical laboratory management API')
+    .setDescription('Multi-tenant SaaS API for medical laboratories')
     .setVersion('2026.1')
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);

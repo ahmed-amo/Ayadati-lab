@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { TenantContext } from '../../../common/tenant/tenant-context.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { LoginDto } from '../dto/login.dto';
 
@@ -8,15 +9,29 @@ export interface LoginResult {
   email: string;
   fullName: string;
   role: string;
+  tenantId: string;
+  tenantSlug: string;
+  tenantName: string;
 }
 
 @Injectable()
 export class LoginUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantContext: TenantContext,
+  ) {}
 
   async execute(dto: LoginDto): Promise<LoginResult> {
+    const tenant = this.tenantContext.getTenant();
+    const email = dto.email.toLowerCase().trim();
+
     const user = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase().trim() },
+      where: {
+        tenantId_email: {
+          tenantId: tenant.id,
+          email,
+        },
+      },
     });
 
     if (!user || user.deletedAt) {
@@ -33,6 +48,9 @@ export class LoginUseCase {
       email: user.email,
       fullName: user.fullName,
       role: user.role,
+      tenantId: tenant.id,
+      tenantSlug: tenant.slug,
+      tenantName: tenant.name,
     };
   }
 }

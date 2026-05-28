@@ -4,7 +4,11 @@ import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export function CtaSection() {
+interface CtaSectionProps {
+  tenantSlug?: string;
+}
+
+export function CtaSection({ tenantSlug = 'demo-lab' }: CtaSectionProps) {
   const t = useTranslations('cta');
   const locale = useLocale();
 
@@ -19,7 +23,7 @@ export function CtaSection() {
           size="lg"
           className="mt-8 bg-teal-500 text-white hover:bg-teal-600"
         >
-          <Link href={`/${locale}/booking`}>{t('button')}</Link>
+          <Link href={`/${locale}/l/${tenantSlug}/booking`}>{t('button')}</Link>
         </Button>
       </div>
     </section>
