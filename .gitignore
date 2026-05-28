@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 .pnp.*
+node_modules/.package-lock.json
 
 # Local / experimental
 AI_INT/

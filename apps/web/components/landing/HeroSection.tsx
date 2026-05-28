@@ -24,7 +24,12 @@ export function HeroSection() {
             {t('subtitle')}
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button asChild variant="teal" size="lg">
+            <Button
+              asChild
+              variant="secondary"
+              size="lg"
+              className="bg-teal-500 text-white hover:bg-teal-600"
+            >
               <Link href={`/${locale}/booking`}>{t('ctaBook')}</Link>
             </Button>
             <Button asChild variant="secondary" size="lg">

@@ -204,7 +204,7 @@ export default function RolesMatrix() {
                         ) : (
                           <Checkbox
                             checked={role.permissions[permission] || false}
-                            onCheckedChange={(checked) =>
+                            onCheckedChange={(checked: boolean | 'indeterminate') =>
                               handlePermissionChange(roles.indexOf(role), permission, checked === true)
                             }
                             className="cursor-pointer"

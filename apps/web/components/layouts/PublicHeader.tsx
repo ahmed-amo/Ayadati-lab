@@ -38,7 +38,12 @@ export function PublicHeader() {
 
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
-          <Button asChild variant="teal" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="secondary"
+            size="sm"
+            className="hidden bg-teal-500 text-white hover:bg-teal-600 sm:inline-flex"
+          >
             <Link href={`/${locale}/booking`}>{t('book')}</Link>
           </Button>
         </div>
