@@ -2,6 +2,10 @@
 node_modules/
 .pnp.*
 
+# Local / experimental
+AI_INT/
+Ayadati-lab/
+
 # Build
 dist/
 .next/
