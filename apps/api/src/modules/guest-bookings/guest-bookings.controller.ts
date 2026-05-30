@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/auth/public.decorator';
 import { TenantInterceptor } from '../../common/tenant/tenant.interceptor';
 import { CreateGuestBookingDto } from './dto/create-guest-booking.dto';
 import { CreateGuestBookingUseCase } from './use-cases/create-guest-booking.use-case';
@@ -7,6 +8,7 @@ import { GuestBookingsService } from './guest-bookings.service';
 
 @ApiTags('guest-bookings')
 @Controller('t/:tenantSlug/public/bookings')
+@Public()
 @UseInterceptors(TenantInterceptor)
 export class GuestBookingsController {
   constructor(

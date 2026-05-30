@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   ListOrdered,
   MessageSquarePlus,
+  Pill,
+  FileText,
   TestTube2,
   UserPlus,
   Users,
@@ -44,6 +46,7 @@ export function navForRole(
         items: [
           { label: 'Dashboard', href: `${p}/admin`, icon: LayoutDashboard },
           { label: 'Staff', href: `${p}/admin/staff`, icon: Users },
+          { label: 'Medicines', href: `${p}/admin/medicines`, icon: Pill },
         ],
       },
     ],
@@ -56,6 +59,11 @@ export function navForRole(
             label: 'Pending results',
             href: `${p}/auditor/results`,
             icon: ClipboardCheck,
+          },
+          {
+            label: 'Prescriptions',
+            href: `${p}/auditor/prescriptions`,
+            icon: FileText,
           },
         ],
       },

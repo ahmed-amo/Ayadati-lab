@@ -101,6 +101,8 @@ model Tenant {
   testResults   TestResult[]
   complaints    Complaint[]
   labServices   LabService[]
+  medicines     Medicine[]
+  prescriptions Prescription[]
 
   @@map("tenants")
 }
@@ -122,6 +124,7 @@ model User {
   testResults        TestResult[] @relation("NurseResults")
   signedResults      TestResult[] @relation("AuditorSignatures")
   complaintsAssigned Complaint[]  @relation("AssignedComplaints")
+  prescriptions      Prescription[] @relation("DoctorPrescriptions")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -265,4 +268,77 @@ model LabService {
   @@unique([tenantId, slug])
   @@index([tenantId])
   @@map("lab_services")
+}
+
+enum PrescriptionStatus {
+  DRAFT
+  FINALIZED
+}
+
+enum PrescriptionGender {
+  MALE
+  FEMALE
+}
+
+/// Tenant-scoped medicine catalog (managed by Admin)
+model Medicine {
+  id          Int      @id @default(autoincrement())
+  tenantId    String   @map("tenant_id")
+  name        String
+  dosageForm  String   @map("dosage_form")
+  strength    String
+  notes       String?
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  prescriptionItems  PrescriptionItem[]
+
+  @@index([tenantId])
+  @@index([tenantId, name])
+  @@map("medicines")
+}
+
+/// Prescription document created by Auditor/Doctor
+model Prescription {
+  id                Int                @id @default(autoincrement())
+  tenantId          String             @map("tenant_id")
+  doctorId          Int                @map("doctor_id")
+  patientName       String             @map("patient_name")
+  age               Int
+  gender            PrescriptionGender
+  date              DateTime           @db.Date
+  status            PrescriptionStatus @default(DRAFT)
+  clinicNameSnapshot String            @map("clinic_name_snapshot")
+  logoUrl           String?            @map("logo_url")
+  signatureUrl      String?            @map("signature_url")
+  headerTheme       Json?              @map("header_theme")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  tenant Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  doctor User               @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  items  PrescriptionItem[]
+
+  @@index([tenantId])
+  @@index([tenantId, doctorId])
+  @@index([tenantId, patientName])
+  @@map("prescriptions")
+}
+
+/// Line item linking a medicine to a prescription
+model PrescriptionItem {
+  id             Int    @id @default(autoincrement())
+  prescriptionId Int    @map("prescription_id")
+  medicineId     Int    @map("medicine_id")
+  dosage         String
+  frequency      String
+  duration       String
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  medicine     Medicine     @relation(fields: [medicineId], references: [id])
+
+  @@index([prescriptionId])
+  @@map("prescription_items")
 }

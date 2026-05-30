@@ -1,22 +1,28 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'path';
+import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
   const port = config.get<number>('app.port', 4000);
   const apiPrefix = config.get<string>('app.apiPrefix', 'api/v1');
   const corsOrigin = config.get<string>('app.corsOrigin', 'http://localhost:3000');
+  const uploadDir = config.get<string>('app.uploadDir', 'uploads');
 
   app.setGlobalPrefix(apiPrefix);
   app.enableCors({ origin: corsOrigin, credentials: true });
+  app.useStaticAssets(join(process.cwd(), uploadDir), {
+    prefix: `/${apiPrefix}/uploads/`,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

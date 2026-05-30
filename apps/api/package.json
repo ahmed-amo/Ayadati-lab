@@ -26,6 +26,8 @@
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "multer": "^2.1.1",
+    "pdfkit": "^0.18.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -34,7 +36,9 @@
     "@nestjs/schematics": "^11.0.4",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.1",
+    "@types/multer": "^2.1.0",
     "@types/node": "^22.14.0",
+    "@types/pdfkit": "^0.17.6",
     "prisma": "^6.6.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"

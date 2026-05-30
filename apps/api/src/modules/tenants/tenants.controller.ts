@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/auth/public.decorator';
 import { RegisterTenantDto } from './dto/register-tenant.dto';
 import { TenantsService } from './tenants.service';
 
 @ApiTags('tenants')
 @Controller('tenants')
+@Public()
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 

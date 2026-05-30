@@ -49,6 +49,28 @@ async function seedTenant(
     });
   }
 
+  const demoMedicines = [
+    { name: 'Paracetamol', dosageForm: 'Tablet', strength: '500mg', notes: 'Take with water' },
+    { name: 'Amoxicillin', dosageForm: 'Capsule', strength: '500mg', notes: 'Complete full course' },
+    { name: 'Ibuprofen', dosageForm: 'Tablet', strength: '400mg', notes: 'Take after meals' },
+    { name: 'Omeprazole', dosageForm: 'Capsule', strength: '20mg', notes: 'Take before breakfast' },
+    { name: 'Metformin', dosageForm: 'Tablet', strength: '850mg', notes: null },
+    { name: 'Amlodipine', dosageForm: 'Tablet', strength: '5mg', notes: null },
+    { name: 'Salbutamol', dosageForm: 'Inhaler', strength: '100mcg', notes: 'As needed for asthma' },
+    { name: 'Vitamin D3', dosageForm: 'Softgel', strength: '1000 IU', notes: null },
+  ];
+
+  for (const med of demoMedicines) {
+    const existing = await prisma.medicine.findFirst({
+      where: { tenantId: tenant.id, name: med.name, deletedAt: null },
+    });
+    if (!existing) {
+      await prisma.medicine.create({
+        data: { tenantId: tenant.id, ...med },
+      });
+    }
+  }
+
   const patientEmail =
     slug === DEMO_SLUG ? 'patient@ayadatilab.dz' : `patient@${slug.replace(/-/g, '')}.dz`;
   const patientUser = await prisma.user.findUnique({

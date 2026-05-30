@@ -36,5 +36,8 @@ npm-debug.log*
 # Test / coverage
 coverage/
 
+# Uploads (prescription logos/signatures)
+apps/api/uploads/
+
 # Puppeteer
 .cache/
